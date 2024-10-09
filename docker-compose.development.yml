@@ -1,0 +1,72 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: 'nginx-recipeNest-API'
+    ports:
+      - '80:80'
+    volumes:
+      - ./public:/app/public:rw
+      - ./docker/nginx/nginx-development.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - php-fpm
+    networks:
+      - recipeNest-shared
+
+  php-fpm:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: development
+    container_name: 'php-fpm-taskwave'
+    working_dir: /app
+    environment:
+      APP_ENV: 'development'
+      MYSQL_DATABASE: 'recipe_nest_api'
+      MYSQL_HOST: 'mysql-recipe-nest'
+      MYSQL_USER: 'testing'
+      MYSQL_PASSWORD: '1234'
+      JWT_SECRET: 'd17c14f3ff470cebe5f85df1efc966b0fcdc2096'
+    volumes:
+      - ./:/app:rw
+    networks:
+      - recipeNest-shared
+
+  mysql:
+    image: mysql
+    container_name: 'mysql-recipeNest-API'
+    hostname: mysql-recipe-nest
+    environment:
+      MYSQL_DATABASE: 'recipe_nest_api'
+      MYSQL_USER: 'testing'
+      MYSQL_PASSWORD: '1234'
+      MYSQL_ROOT_PASSWORD: '1234'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - recipeNestData:/var/lib/mysql:rw
+      - ./data/mysql:/docker-entrypoint-initdb.d/:ro
+    networks:
+      - recipeNest-shared
+
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: 'pma-recipe-nest'
+    links:
+      - mysql
+    environment:
+      PMA_HOST: mysql-recipe-nest
+      PMA_PORT: 3306
+      PMA_ARBITRAY: 1
+    ports:
+      - '8081:80'
+    networks:
+      - recipeNest-shared
+
+volumes:
+  recipeNestData:
+
+networks:
+  recipeNest-shared:
+    driver: bridge
