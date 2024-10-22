@@ -18,8 +18,8 @@ jobs:
 
       - name: Run PHP CodeSniffer (phpcs)
         run: |
-          docker run --rm recipe-nest-app vendor/bin/phpcs --standard=PSR12 src/
+          docker run --rm recipe-nest-app vendor/bin/phpcs --standard=PSR12 src/ phpcs.xml
 
       - name: Run PHP Mess Detector (phpmd)
         run: |
-          docker run --rm recipe-nest-app vendor/bin/phpmd src/ text cleancode,codesize,controversial,design,naming,unusedcode
+          docker run --rm recipe-nest-app vendor/bin/phpmd src/ text cleancode,codesize,controversial,design,naming,unusedcode phpmd.xml
