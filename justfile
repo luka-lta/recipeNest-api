@@ -1,8 +1,24 @@
-docker_run := 'docker compose -f docker-compose.development.yml run --rm php-fpm'
+dockerCompose := "docker compose -f docker-compose.development.yml"
+containerRun  := dockerCompose + " run --rm php-fpm"
+
+install:
+    composer install
+
+start:
+    {{dockerCompose}} up -d
+
+stop:
+    {{dockerCompose}} down
+
+test +ARGS="":
+    {{containerRun}} vendor/bin/phpunit {{ARGS}}
+
+test-filter FILTER="" +ARGS="":
+    {{containerRun}} vendor/bin/phpunit --filter "{{FILTER}}" {{ARGS}}
 
 lint:
-    {{docker_run}} vendor/bin/phpmd src text codesize
-    {{docker_run}} vendor/bin/phpcs src
+    {{containerRun}} vendor/bin/phpmd src text phpmd.xml
+    {{containerRun}} vendor/bin/phpcs src
 
-dev:
-    docker compose -f docker-compose.development.yml up
+build ENV="development":
+    DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose -f docker-compose.{{ENV}}.yml build --pull
